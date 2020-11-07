@@ -80,10 +80,15 @@ final class Rino
          */
         $separateTypes = str_replace(':', ' ', $replaceKeys);
         /**
+         * If have 'increments' statement, replace with auto_increment primary key
+         * @var string
+         */
+        $addIncrements = str_replace('increments', 'auto_increment primary key', $separateTypes);
+        /**
          * Replace ~ to ' '
          * @var string
          */
-        $diffSpaces = str_replace('~', ' ', $separateTypes);
+        $diffSpaces = str_replace('~', ' ', $addIncrements);
         /**
          * Configuring 'nullable' settings
          * (by default, all columns will be 'not null')
