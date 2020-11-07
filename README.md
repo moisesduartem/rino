@@ -30,3 +30,7 @@ class CreateUsersTable
     }
 }
 ```
+
+---
+- Moisés Mariano
+- [Rino Github Project](https://github.com/moisesduartem/rino)
