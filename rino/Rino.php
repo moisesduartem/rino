@@ -22,6 +22,18 @@ final class Rino extends Schema
         parent::__construct($credentials);
     }
 
+    public function list()
+    {
+        $tableNames = $this->showTables();
+        echo "tables in '" . static::$credentials->database . "'\n";
+        /**
+         * List database tables on cli
+         */
+        foreach ($tableNames as $table) {
+            echo $table['Tables_in_' . static::$credentials->database] . PHP_EOL;
+        }
+    }
+
     public function reset()
     {
         /**
