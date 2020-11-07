@@ -16,10 +16,10 @@ class CreateUsersTable
         return (
             'create table users (
                 id int not null primary key auto_increment,
-				name varchar(155) not null,
-				email varchar(155) not null,
-				course_id not null,
-				foreign key (course_id) references courses(id)
+                name varchar(155) not null,
+                email varchar(155) not null,
+                course_id not null,
+                foreign key (course_id) references courses(id)
             )'
         );
     }
