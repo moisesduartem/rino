@@ -22,6 +22,39 @@ final class Rino extends Schema
         parent::__construct($credentials);
     }
 
+    public function reset()
+    {
+        /**
+         * Receive table names
+         * @var array
+         */
+        $tableNames = $this->showTables();
+        /**
+         * Build a SQL query to drop tables in 
+         * reverse order to avoid foreign key errors
+         */
+        $sqlToDropTables = '';
+        foreach ($tableNames as $table) {
+            $sqlToDropTables = 
+            'drop table if exists '. $table['Tables_in_' . static::$credentials->database] . ';' . PHP_EOL
+            . $sqlToDropTables;
+        }
+        /**
+         * Execute query
+         * @var \PDOStatement
+         */
+        $stmt = $this->query($sqlToDropTables);
+        /**
+         * If something it's wrong,
+         * @throws \Exception
+         */
+        $this->checkErrors($stmt);
+        /**
+         * All worked...
+         */
+        echo "Database " . static::$credentials->database . " has been restored." . PHP_EOL;
+    }
+
     public function migrate()
     {
         /**
@@ -65,16 +98,22 @@ final class Rino extends Schema
         echo "Processing... $migrationFile\n";
         $stmt = $this->query($sql);
         /**
-         * If something is wrong, tells what
+         * If something is wrong, 
+         * @throws \Exception
          */
-        if ($stmt->errorCode() != 0000) {
-            $errorMessage = PHP_EOL . $stmt->errorInfo()[2] . " ($migrationFile)." . PHP_EOL;
-            throw new \Exception($errorMessage);
-        }
+        $this->checkErrors($stmt);
         /**
          * If it worked, shows a message
          */
         echo "$migrationFile migrated \n\n";
+    }
+
+    private function checkErrors(\PDOStatement $stmt) : void
+    {
+        if ($stmt->errorCode() != 0000) {
+            $errorMessage = PHP_EOL . $stmt->errorInfo()[2] . PHP_EOL;
+            throw new \Exception($errorMessage);
+        }
     }
 
     private function getClassName(string $migrationFile) : string
