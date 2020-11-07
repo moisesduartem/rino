@@ -5,18 +5,95 @@ namespace Rino;
 
 use DateTime;
 use Exception;
+use Rino\Schema;
 
-final class Rino
+final class Rino extends Schema
 {
     public string $migrationsPath;
+    private string $root;
     private string $example;
     private string $foreignStuff = '';
 
-    public function __construct(string $migrationsPath, array $credentials)
+    public function __construct(string $root, string $migrationsPath, object $credentials)
     {
+        $this->root = $root;
         $this->migrationsPath = $migrationsPath;
-        $this->credentials = $credentials;
         $this->example = file_get_contents(__DIR__ . '/example/migration.php');
+        parent::__construct($credentials);
+    }
+
+    public function migrate()
+    {
+        /**
+         * Read all migrations filenames
+         * @var array
+         */
+        $migrationFiles = array_slice(scandir($this->migrationsPath), 2);
+        /**
+         * Parse migration filenames
+         */
+        foreach ($migrationFiles as $migrationFile) {
+            /**
+             * Try to execute one by one
+             */
+            $this->runMigration($migrationFile);
+        }
+        /**
+         * After execute all successfully, shows a message
+         */
+        echo "Done! Check '" . static::$credentials->database . "' database on ". static::$credentials->driver.".\n";
+    }
+
+    private function runMigration(string $migrationFile) 
+    {
+        /**
+         * Require the migration class
+         */
+        require $this->migrationsPath . '/' . $migrationFile;
+        $className = $this->getClassName($migrationFile);
+        /**
+         * Instanciate migration class
+         */
+        $class = new $className();
+        /**
+         * Receives SQL query from migration UP method
+         */
+        $sql = $class->up();
+        /**
+         * Execute SQL query
+         */
+        echo "Processing... $migrationFile\n";
+        $stmt = $this->query($sql);
+        /**
+         * If something is wrong, tells what
+         */
+        if ($stmt->errorCode() != 0000) {
+            $errorMessage = PHP_EOL . $stmt->errorInfo()[2] . " ($migrationFile)." . PHP_EOL;
+            throw new \Exception($errorMessage);
+        }
+        /**
+         * If it worked, shows a message
+         */
+        echo "$migrationFile migrated \n\n";
+    }
+
+    private function getClassName(string $migrationFile) : string
+    {
+        /**
+         * Remove .php extension
+         * @var string
+         */
+        $withoutExtension = str_replace('.php', '', $migrationFile);
+        /**
+         * Remove dateTime string from migration filename
+         * @var string
+         */
+        $withoutDate = preg_replace('/\d+./', '', $withoutExtension);
+        /**
+         * Returns correspondent class name to migration
+         * @var string
+         */
+        return $this->transformToPascal(implode('_', explode('_', $withoutDate)));
     }
 
     public function generateMigration(string $migration_name, ...$columns) 
@@ -127,10 +204,12 @@ final class Rino
 
     private function generate(string $fileContent, string $migration_name) : void
     {
+        $newMigrationFilename = $this->migrationsPath . '/' . $this->getDate() . '_' .  $migration_name . '.php'; 
         file_put_contents(
-            $this->migrationsPath . '/' . $this->getDate() . '_' .  $migration_name . '.php', 
+            $newMigrationFilename, 
             $fileContent
         );
+        echo "Migration created at: $newMigrationFilename.\n";
     }
 
     private function getDate() : string
