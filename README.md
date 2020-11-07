@@ -2,7 +2,7 @@
 
 This: 
 ```
-name:varchar{155}:not~null email:varchar{155}:not~null course_id:not~null
+id:int:increments name:varchar{155}:not~null email:varchar{155}:not~null course_id:not~null
 ```
 
 Can be transform on this:
