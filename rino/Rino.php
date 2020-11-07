@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Rino;
 
 use DateTime;
+use Exception;
 
 final class Rino
 {
     public string $migrationsPath;
     private string $example;
     private string $foreignStuff = '';
-    private static string $increments = 'primary key auto_increment';
 
     public function __construct(string $migrationsPath, array $credentials)
     {
@@ -21,6 +21,14 @@ final class Rino
 
     public function generateMigration(string $migration_name, ...$columns) 
     {
+        /**
+         * If <action>_<table_name>_table convention isn't be
+         * followed,
+         * @throws Exception
+         */
+        if (!preg_match('/_table/', $migration_name)) {
+            throw new Exception("You must follow Rino's migration name convention.");
+        }
         /**
          * Transform migration_name to MigratioName case pattern
          * @var string
@@ -61,8 +69,12 @@ final class Rino
         /**
          * Parses received columns and rewrite them to SQL syntax
          */
-        foreach ($columns as $column) {
-            $finalQuery .= ",\n\t\t\t\t" . $this->rewriteColumn($column);
+        foreach ($columns as $key => $column) {
+            if ($key == 0) {
+                $finalQuery .= $this->rewriteColumn($column);
+            } else {
+                $finalQuery .= ",\n\t\t\t\t" . $this->rewriteColumn($column);
+            }
         }
         return $finalQuery;
     }
