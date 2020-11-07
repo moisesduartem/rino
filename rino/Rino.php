@@ -10,6 +10,7 @@ final class Rino
     public string $migrationsPath;
     private string $example;
     private string $foreignStuff = '';
+    private static string $increments = 'primary key auto_increment';
 
     public function __construct(string $migrationsPath, array $credentials)
     {
@@ -83,6 +84,15 @@ final class Rino
          * @var string
          */
         $diffSpaces = str_replace('~', ' ', $separateTypes);
+        /**
+         * Configuring 'nullable' settings
+         * (by default, all columns will be 'not null')
+         */
+        $diffSpaces .= ' not null';
+        if (preg_match('/nullable/', $diffSpaces)) {
+            $diffSpaces = str_replace('not null', '', $diffSpaces);
+        }
+        $diffSpaces = str_replace('nullable', '', $diffSpaces);
         /**
          * If has <name>_id, it's a foreign key from 'names'
          */
