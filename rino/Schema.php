@@ -12,12 +12,22 @@ class Schema
         static::$credentials = $credentials;
     }
 
-    public function query(string $sql) : \PDOStatement
+    public function query(string $sql, array $params = []) : \PDOStatement
     {
         $pdo = static::getConnection(static::$credentials);
         $stmt = $pdo->prepare($sql);
+        if ($params != []) {
+            $this->bindParams($stmt, $params);
+        }
         $stmt->execute();
         return $stmt;
+    }
+
+    private function bindParams(\PDOStatement $stmt, array $params) : void
+    {
+        foreach ($params as $key => $value) {
+            $stmt->bindParam($key, $value);
+        }
     }
 
     public function showTables()
