@@ -7,13 +7,37 @@ use DateTime;
 use Exception;
 use Rino\Schema;
 
+/**
+ * Class Rino
+ * @package Rino
+ * @author Moisés Mariano
+ * @github /moisesduartem/rino
+ */
 final class Rino extends Schema
 {
+    /**
+     * @var string
+     */
     public string $migrationsPath;
+    /**
+     * @var string
+     */
     private string $root;
+    /**
+     * @var false|string
+     */
     private string $example;
+    /**
+     * @var string
+     */
     private string $foreignStuff = '';
 
+    /**
+     * Rino constructor.
+     * @param string $root
+     * @param string $migrationsPath
+     * @param object $credentials
+     */
     public function __construct(string $root, string $migrationsPath, object $credentials)
     {
         $this->root = $root;
@@ -22,6 +46,9 @@ final class Rino extends Schema
         parent::__construct($credentials);
     }
 
+    /**
+     *
+     */
     public function list()
     {
         $tableNames = $this->showTables();
@@ -34,6 +61,9 @@ final class Rino extends Schema
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function reset()
     {
         /**
@@ -67,6 +97,9 @@ final class Rino extends Schema
         echo "Database " . static::$credentials->database . " has been restored." . PHP_EOL;
     }
 
+    /**
+     *
+     */
     public function migrate()
     {
         /**
@@ -89,7 +122,11 @@ final class Rino extends Schema
         echo "Done! Check '" . static::$credentials->database . "' database on ". static::$credentials->driver.".\n";
     }
 
-    private function runMigration(string $migrationFile) 
+    /**
+     * @param string $migrationFile
+     * @throws Exception
+     */
+    private function runMigration(string $migrationFile)
     {
         /**
          * Require the migration class
@@ -120,6 +157,10 @@ final class Rino extends Schema
         echo "$migrationFile migrated \n\n";
     }
 
+    /**
+     * @param \PDOStatement $stmt
+     * @throws Exception
+     */
     private function checkErrors(\PDOStatement $stmt) : void
     {
         if ($stmt->errorCode() != 0000) {
@@ -128,6 +169,10 @@ final class Rino extends Schema
         }
     }
 
+    /**
+     * @param string $migrationFile
+     * @return string
+     */
     private function getClassName(string $migrationFile) : string
     {
         /**
@@ -147,7 +192,13 @@ final class Rino extends Schema
         return $this->transformToPascal(implode('_', explode('_', $withoutDate)));
     }
 
-    public function generateMigration(string $migration_name, ...$columns) 
+    /**
+     * @param string $migration_name
+     * @param mixed ...$columns
+     * @return bool
+     * @throws Exception
+     */
+    public function generateMigration(string $migration_name, ...$columns)
     {
         /**
          * If <action>_<table_name>_table convention isn't be
@@ -191,6 +242,10 @@ final class Rino extends Schema
         $this->generate($fileWithColumns, $migration_name);
     }
 
+    /**
+     * @param mixed ...$columns
+     * @return string
+     */
     private function querifyColumns(...$columns) : string
     {
         $finalQuery = '';
@@ -207,6 +262,10 @@ final class Rino extends Schema
         return $finalQuery;
     }
 
+    /**
+     * @param string $column
+     * @return string
+     */
     public function rewriteColumn(string $column) : string
     {
         /**
@@ -253,6 +312,10 @@ final class Rino extends Schema
         return $diffSpaces;
     }
 
+    /**
+     * @param string $fileContent
+     * @param string $migration_name
+     */
     private function generate(string $fileContent, string $migration_name) : void
     {
         $newMigrationFilename = $this->migrationsPath . '/' . $this->getDate() . '_' .  $migration_name . '.php'; 
@@ -263,6 +326,9 @@ final class Rino extends Schema
         echo "Migration created at: $newMigrationFilename.\n";
     }
 
+    /**
+     * @return string
+     */
     private function getDate() : string
     {
         /**
@@ -272,6 +338,12 @@ final class Rino extends Schema
         return (new DateTime())->format('YmdHis');
     }
 
+    /**
+     * @param string $MigrationName
+     * @param string $table_name
+     * @param mixed ...$columns
+     * @return string
+     */
     private function replacements(string $MigrationName, string $table_name, ...$columns) : string
     {
         /**
@@ -287,6 +359,10 @@ final class Rino extends Schema
         return $fileWithTheTableName;
     }
 
+    /**
+     * @param string $migration_name
+     * @return string
+     */
     private function parseMigrationName(string $migration_name) : string
     {
         /**
@@ -318,6 +394,10 @@ final class Rino extends Schema
         return implode('_', array_slice($command, 1));
     }
 
+    /**
+     * @param string $snake_case_string
+     * @return string
+     */
     private function transformToPascal(string $snake_case_string) : string
     {
         /**
