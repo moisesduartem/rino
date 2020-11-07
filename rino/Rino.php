@@ -43,7 +43,7 @@ final class Rino
              * Generate the migration file at the
              * path passed on the class constructor
              */
-            $this->generate($fileWithoutColumns, $migration_name);
+            $this->generate(str_replace('$columns', '', $fileWithoutColumns), $migration_name);
             return true;
         }
         $fileWithColumns = str_replace(
