@@ -31,6 +31,11 @@ class CreateUsersTable
 }
 ```
 
+Some Rino methods:
+- `$rino->migrate();`
+- `$rino->list();`
+- `$rino->reset();`
+
 ---
 - Moisés Mariano
 - [Rino Github Project](https://github.com/moisesduartem/rino)
