@@ -20,6 +20,16 @@ class Schema
         return $stmt;
     }
 
+    public function showTables()
+    {
+        return $this->query('show tables')->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    protected function setForeignKeyChecks(int $value)
+    {
+        $this->query('set foreign_key_checks=' . (string) $value);
+    }
+
     protected static function getConnection(object $credentials) : \PDO
     {
         return new \PDO (
